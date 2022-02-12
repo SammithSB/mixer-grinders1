@@ -1,4 +1,4 @@
-
+const axios = require('axios')
 const token = process.env['token']
 const Discord = require('discord.js');
 const keepAlive = require("./server")
@@ -32,31 +32,39 @@ client.on('guildMemberAdd', (member) =>{
 
 client.on('message', async (message) => {
   if (message.author.bot) return;
+  if(message.content != null) {
+    return axios.post("https://mighty-forest-70605.herokuapp.com/predict", {
+          text: message.content
+        }).then(function (response) {
+            //handle response here
+             message.reply(response['data']);
+        })
+  }
   if (!message.content.startsWith(prefix)) return;
   const args = message.content.slice(prefix.length).trim().split(/ +/g);
   const commands = args.shift();
 
   if (commands == "play") {
-    if (!message.member.voice.channel) return message.channel.send('ayy voice channel join ago badmash -FBI');
-    if (!args[0]) return message.channel.send('haad hesaru helana 😤');
+    if (!message.member.voice.channel) return message.channel.send('please join voice channel first');
+    if (!args[0]) return message.channel.send('please tell song name');
     distube.play(message, args.join(" "));
 
   }
   if (commands == "pause") {
     distube.pause(message)
-    message.channel.send("ha nonsense togo break, nangu had koogi koogi sakagoytu");
+    message.channel.send(`{message} song has been paused`);
   }
   if (commands == "resume") {
     distube.resume(message)
-    message.channel.send("yeshtot madudyalo vapas barakke, innen bittogtidde vc");
+    message.channel.send("song has resumed");
   }
   if (commands === 'skip') {
     distube.skip(message)
-    message.channel.send("paapa aa artist kashta patti sangeeta produce madidane, ninu skip madtiyalo, aytu nangenu");
+    message.channel.send("song skipped");
   }
   if (commands == "stop") {
     distube.stop(message);
-    message.channel.send('ha nadi maneg haadu mugitu')
+    message.channel.send('song stopped')
   }
 
   if (commands === 'queue') {
@@ -87,6 +95,24 @@ client.on('message', async (message) => {
         message.member.roles.highest.position) return message.channel.send('You cannot kick this user')
     member.kick()
     message.channel.send(`${member} has been kicked`)
+  }
+  if(commands ==='mute'){
+    const member = message.mentions.members.first()
+    if(member){
+        const target = message.mentions.members.first();
+        if(target){
+        let mainRole = message.guild.cache.find(role => role.name === 'member');
+        let muteRole = message.guild.cache.find(role => role.name === 'muted');
+        let memberTarget = message.guild.cache.find(member => member.id === target.id);
+        memberTarget.roles.remove(mainRole);
+        memberTarget.roles.add(muteRole);
+        message.channel.send(`${member} has been muted`);
+      }
+  }
+  else{
+        message.channel.send('Please mention a user')
+    }
+
   }
 
 })
