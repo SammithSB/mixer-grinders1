@@ -18,15 +18,16 @@ const prefix = '&'
 client.login(token);
 client.on('ready', () => {
   console.log('Ready!');
-});
+    });
 client.on('reconnecting', () => {
   console.log('Reconnecting!');
 });
+
 client.on('disconnect', () => {
   console.log('Disconnect!');
 });
 client.on('guildMemberAdd', (member) =>{
-    member.send("HI, you are member number "+member.guild.memberCount+" at mixer grinder");
+    member.send("HI, you are member number "+member.guild.memberCount+" at mixer grinder, use commands with & as prefix, type &help to know more about commands.");
 
 });
 
@@ -37,13 +38,23 @@ client.on('message', async (message) => {
           text: message.content
         }).then(function (response) {
             //handle response here
-             message.reply(response['data']);
+             console.log(response['data'])
+             if(response['data']=='hate speech'){
+               message.reply('hate');
+               message.member.kick();
+             }
         })
-  }
+  }})
+
+client.on('message', async (message) => {
+  if (message.author.bot) return;
+  
   if (!message.content.startsWith(prefix)) return;
   const args = message.content.slice(prefix.length).trim().split(/ +/g);
   const commands = args.shift();
-
+  if(commands == "hi"){
+    message.channel.send('hi');
+  }
   if (commands == "play") {
     if (!message.member.voice.channel) return message.channel.send('please join voice channel first');
     if (!args[0]) return message.channel.send('please tell song name');
