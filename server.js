@@ -1,15 +1,21 @@
-const express = require("express")
+const {spawn} = require('child_process')
+const express = require('express')
+const app = express()
+const port = 3000
 
-const server = express()
+app.get('/', (req, res) => {
+    const message = req.headers.text;
+    if(message != null) {
+      // const python = spawn('python3', ['model.py', message]);
+      // // collect data from script
+      // python.stdout.on('data', function (data) {
+      // classification = data.toString();
+      // if(classification == "yes") {
+      //   res.send("yes")
+      // }
+      // });
+      res.send(message)  
+    }  
+   })
 
-server.all("/", (req, res) => {
-  res.send("Bot is running!")
-})
-
-function keepAlive() {
-  server.listen(3000, () => {
-    console.log("Server is ready.")
-  })
-}
-
-module.exports = keepAlive
+app.listen(port, () => console.log(`Model is listening on port ${port}!`))
