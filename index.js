@@ -2,6 +2,11 @@ const axios = require('axios')
 const token = process.env['token']
 const Discord = require('discord.js');
 const keepAlive = require("./server")
+const { MessageEmbed } = require('discord.js');
+const Database = require("@replit/database")
+const db = new Database()
+// inside a command, event listener, etc.
+
 // Create a new client instance
 const client = new Discord.Client({
   intents: [
@@ -40,8 +45,17 @@ client.on('message', async (message) => {
             //handle response here
              console.log(response['data'])
              if(response['data']=='hate speech'){
-               message.reply('hate');
-               message.member.kick();
+               message.reply('This is an unacceptable hate text.');
+               db.get(String(message.member)).then(value => {
+                 if(!value) {
+                   db.set(String(message.member), "1")
+                   message.reply("Final warning for you!")
+                 }
+                 else {
+                   db.delete(String(message.member))
+                   message.member.kick();
+                 }
+               })
              }
         })
   }})
@@ -97,6 +111,17 @@ client.on('message', async (message) => {
     }
 
   }
+  if(commands === 'help'){
+    const exampleEmbed = new MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle('Mixer Grinder bot')
+	.setURL('https://discord.js.org/')
+	.setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/i1qCdPI.jpg', url: 'https://discord.js.org' })
+	.setDescription('Mixer grinder is a multi purpose discord bot with main purpose being to reduce hate speech inside server.\nUse &play *song name/spotify or youtube link* to play a song.\n&help to know about all commands.\n&kick @username to kick user that is if you are allowed to.\nThe bot keeps track of all messages and if it finds any kind of hate speech, it Immediately kicks the user out of the server.\&pause/resume/skip/stop to do respectively that.\n&queue to check out upcoming songs.')
+	.setThumbnail('https://i.imgur.com/i1qCdPI.jpg')
+message.channel.send({ embeds: [exampleEmbed] });
+  }
+
   if(commands ==='kick'){
     const member = message.mentions.members.first()
     if(!member) return message.channel.send('Please mention a user')
